@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Revolution | Mídia paga</title>
+<title>Imobiliária Price BR | Mídia Paga</title>
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📈</text></svg>">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -67,8 +67,8 @@ select.presets{border:1px solid var(--line);border-radius:999px;background:var(-
 .delta.up-good,.delta.down-good{color:var(--good)}
 .delta.up-bad,.delta.down-bad{color:var(--bad)}
 
-/* Gráfico + leitura */
-.mid{display:grid;grid-template-columns:minmax(0,1.7fr) minmax(300px,1fr);gap:22px;margin-bottom:28px}
+/* Gráfico */
+.mid{display:grid;grid-template-columns:minmax(0,1fr);gap:22px;margin-bottom:28px}
 @media (max-width:980px){.mid{grid-template-columns:1fr}}
 .panel{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius-lg);padding:18px 18px 14px}
 .panel h2{margin:0 0 4px;font-size:18px;font-weight:700;font-stretch:85%}
@@ -79,15 +79,6 @@ select.presets{border:1px solid var(--line);border-radius:999px;background:var(-
 #chart{width:100%;height:280px;display:block}
 .tip{position:fixed;pointer-events:none;background:var(--ink);color:var(--paper);font-size:12.5px;padding:8px 10px;border-radius:var(--radius-sm);opacity:0;transition:opacity .12s;z-index:10;line-height:1.5}
 
-.insights{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:8px;max-height:460px;overflow:auto}
-.insights li{border-left:4px solid var(--line);background:var(--info-bg);border-radius:0 var(--radius-sm) var(--radius-sm) 0;padding:9px 12px;cursor:pointer}
-.insights li.crit{border-color:var(--bad);background:var(--bad-bg)}
-.insights li.warn{border-color:var(--warn);background:var(--warn-bg)}
-.insights li.good{border-color:var(--good);background:var(--good-bg)}
-.insights li.info{border-color:var(--meta)}
-.insights strong{display:block;font-size:14px;font-weight:650}
-.insights span{font-size:13.5px;color:var(--ink);opacity:.85}
-.insights li:hover{filter:brightness(.97)}
 
 /* Tabelas */
 .tablehead{display:flex;flex-wrap:wrap;gap:12px;align-items:center;justify-content:space-between;margin-bottom:12px}
@@ -131,9 +122,9 @@ td.good{color:var(--good);font-weight:600} td.bad{color:var(--bad);font-weight:6
 <div class="wrap">
   <header class="top">
     <div class="brand">
-      <img class="logo" id="logo" src="logo.png" alt="Revolution"
+      <img class="logo" id="logo" src="logo.png" alt="Imobiliária Price BR"
            onerror="if(!this.dataset.t){this.dataset.t=1;this.src='logo.svg'}else if(this.dataset.t==1){this.dataset.t=2;this.src='logo.jpg'}else{this.hidden=true;document.getElementById('title').hidden=false}">
-      <h1 id="title" hidden>Revolution, mídia paga</h1>
+      <h1 id="title" hidden>Imobiliária Price BR | Mídia Paga</h1>
       <p id="updated">Carregando dados da planilha…</p>
     </div>
     <div class="controls">
@@ -177,21 +168,18 @@ const CONFIG = {
     meta:   { date:null, campaign:null, adset:null, ad:null, spend:null, impressions:null, clicks:null, leads:null },
     google: { date:null, campaign:null, adset:null, ad:null, spend:null, impressions:null, clicks:null, leads:null },
   },
-  // Para ver só campanhas cujo nome contém este texto (ex: "revolution").
+  // Para ver só campanhas cujo nome contém este texto (ex: "lancamento").
   // Deixe "" para mostrar tudo.
   campaignNameFilter: "",
-  // Só campanhas com este termo no nome contam para leads, CPL e alertas
-  // de geração de lead. As demais (engajamento, topo de funil...) entram
-  // apenas no investimento, impressões e cliques.
-  leadCampaignKeyword: "bofu",
-  // Antes desta data não existia a nomenclatura BOFU: todas as campanhas
-  // contam para leads, CPL e conversão. A partir dela, só as BOFU.
-  bofuStartDate: "2026-09-01",
-  // Canal de conversão no Meta, a partir de bofuStartDate: campanha com um
-  // destes termos no nome converte no site/LP; as demais, no formulário do Meta.
-  // Antes de bofuStartDate, o Meta convertia fora (Typeform), então conta como site/LP.
-  siteKeywords: ["lp","site"],
-  // Regras dos insights
+  // Leads do Meta: vêm da coluna de conversas por mensagem iniciadas
+  // (Messaging Conversations Started). O Google usa a coluna Leads/Conversions.
+  // Se o cabeçalho da planilha for diferente, escreva o nome exato em
+  // columns.meta.leads, lá em cima.
+  metaLeadColumns: ['messaging conversations started','messaging conversation started','conversas por mensagem iniciadas','conversas iniciadas por mensagem','conversas por mensagem iniciada'],
+  // Opcional: se preencher (ex: "conversao"), só campanhas com este termo
+  // no nome contam para leads e CPL. Deixe "" para todas contarem.
+  leadCampaignKeyword: "",
+  // Regras das etiquetas Melhor / Atenção
   rules: {
     minSpendShare: 0.03,   // item precisa ter pelo menos 3% do investimento para entrar no ranking
     historyDays: 90,       // CPL de referência = histórico da própria plataforma nos 90 dias anteriores
@@ -216,11 +204,8 @@ const SYNONYMS = {
   impressions: ['impressions','impressoes','impr'],
   clicks:      ['link clicks','cliques no link','clicks','cliques','clicks all','cliques todos'],
   leads:       ['leads','lead','cadastros','on facebook leads','website leads','conversions','conversoes','all conversions','todas as conversoes'],
-  // Coluna opcional "Results": quando existe, é usada nas campanhas BOFU
-  // (a partir de bofuStartDate) para bater com a coluna Resultados do Meta.
-  results:     ['results','resultados'],
 };
-const INT_FIELDS = ['impressions','clicks','leads','results'];
+const INT_FIELDS = ['impressions','clicks','leads'];
 
 /* ---------- utilidades ---------- */
 const $ = s => document.querySelector(s);
@@ -257,12 +242,12 @@ function parseCSV(text){
   return rows.filter(r=>r.some(v=>v.trim()!==''));
 }
 
-function findColumn(headers, field, override){
-  const H = headers.map(norm);
+function findColumn(headers, field, override, list){
+  const H = headers.map(norm), syn = list || SYNONYMS[field];
   if(override){ const i=H.indexOf(norm(override)); if(i>=0) return i; }
-  for(const s of SYNONYMS[field]){ const i=H.indexOf(s); if(i>=0) return i; }
+  for(const s of syn){ const i=H.indexOf(s); if(i>=0) return i; }
   const blocked=/\b(per|por|ctr|cpc|cpm|cpl|rate|taxa|custo por|cost per|unique|unico|id)\b/;
-  for(const s of SYNONYMS[field]){
+  for(const s of syn){
     if(s.length<=3) continue;
     const i=H.findIndex(h=>h.startsWith(s) && !blocked.test(h.replace(s,'')));
     if(i>=0) return i;
@@ -308,11 +293,13 @@ function normalize(csvText, plat){
   const headers=table[0], body=table.slice(1);
   const idx={};
   for(const f of Object.keys(SYNONYMS)) idx[f]=findColumn(headers,f,CONFIG.columns[plat][f]);
+  if(plat==='meta') idx.leads=findColumn(headers,'leads',CONFIG.columns.meta.leads,CONFIG.metaLeadColumns);
   report.columns=Object.fromEntries(Object.entries(idx).map(([k,i])=>[k,i>=0?headers[i]:null]));
   for(const f of ['date','campaign','spend']) if(idx[f]<0) report.missing.push(f);
+  report.noLeads = idx.leads<0;
   if(report.missing.length) return {rows:[], report};
   const br={};
-  for(const f of ['spend','impressions','clicks','leads','results']) br[f]= idx[f]>=0 ? commaDecimal(body.slice(0,400).map(r=>r[idx[f]]), INT_FIELDS.includes(f)) : false;
+  for(const f of ['spend','impressions','clicks','leads']) br[f]= idx[f]>=0 ? commaDecimal(body.slice(0,400).map(r=>r[idx[f]]), INT_FIELDS.includes(f)) : false;
   const nf=norm(CONFIG.campaignNameFilter);
   const rows=[];
   for(const r of body){
@@ -326,11 +313,9 @@ function normalize(csvText, plat){
       spend: toNum(r[idx.spend],br.spend),
       impressions: idx.impressions>=0 ? toNum(r[idx.impressions],br.impressions) : 0,
       clicks: idx.clicks>=0 ? toNum(r[idx.clicks],br.clicks) : 0,
-      leads: (date >= CONFIG.bofuStartDate && idx.results>=0)
-               ? toNum(r[idx.results],br.results)
-               : (idx.leads>=0 ? toNum(r[idx.leads],br.leads) : 0),
-      lead: date < CONFIG.bofuStartDate || isLeadCamp(campaign),
-      seg: segOf(plat, date, campaign),
+      leads: idx.leads>=0 ? toNum(r[idx.leads],br.leads) : 0,
+      lead: isLeadCamp(campaign),
+      seg: plat,
     });
   }
   report.rows=rows.length;
@@ -338,18 +323,12 @@ function normalize(csvText, plat){
 }
 
 /* ---------- métricas ---------- */
-const isLeadCamp = name => norm(name).split(' ').includes(norm(CONFIG.leadCampaignKeyword)) || norm(name).replace(/ /g,'').includes(norm(CONFIG.leadCampaignKeyword));
+const isLeadCamp = name => !norm(CONFIG.leadCampaignKeyword) || norm(name).split(' ').includes(norm(CONFIG.leadCampaignKeyword)) || norm(name).replace(/ /g,'').includes(norm(CONFIG.leadCampaignKeyword));
 const leadAvg = (rows,plat) => metrics(rows.filter(r=>r.plat===plat && r.lead));
 const PLAT_NAME={meta:'Meta',google:'Google'};
 // Segmentos comparáveis: cada um só é comparado com o próprio histórico
-const SEGS=['meta-form','meta-site','google'];
-const SEG_NAME={'meta-form':'Meta formulário','meta-site':'Meta site/LP','google':'Google'};
-function segOf(plat, date, campaign){
-  if(plat!=='meta') return 'google';
-  if(date < CONFIG.bofuStartDate) return 'meta-site';
-  const toks=norm(campaign).split(' ');
-  return CONFIG.siteKeywords.some(k=>toks.includes(norm(k))) ? 'meta-site' : 'meta-form';
-}
+const SEGS=['meta','google'];
+const SEG_NAME={meta:'Meta',google:'Google'};
 const segAvg=(rows,seg)=>metrics(rows.filter(r=>r.seg===seg && r.lead));
 // CPL de referência de cada plataforma: histórico dela mesma antes do período.
 // Meta e Google nunca são comparados entre si.
@@ -361,7 +340,7 @@ function cplBenchmark(seg){
   const p=metrics(S.all.filter(r=>r.seg===seg && r.lead && r.date>=S.from && r.date<=S.to));
   return {cpl:p.cpl, hist:false, label:`média de ${SEG_NAME[seg]} no período`};
 }
-// Leads, CPL e conversão consideram apenas campanhas BOFU
+// Leads, CPL e conversão consideram apenas campanhas que contam lead
 function metrics(list){
   const m={spend:0,impressions:0,clicks:0,leads:0,leadSpend:0,leadClicks:0};
   for(const r of list){
@@ -411,87 +390,6 @@ function applyPreset(v){
   $('#from').value=S.from; $('#to').value=S.to;
 }
 
-/* ---------- insights ---------- */
-function buildInsights(rows, prevRows){
-  const R=CONFIG.rules, out=[];
-  const tot=metrics(rows); if(!tot.spend) return out;
-  if(!rows.some(r=>r.lead)){
-    out.push({sev:'info', title:`Nenhuma campanha ${CONFIG.leadCampaignKeyword.toUpperCase()} neste período`,
-      text:`Leads e CPL só consideram campanhas com "${CONFIG.leadCampaignKeyword}" no nome. Confira a nomenclatura ou escolha outro período.`});
-  }
-  const prev=metrics(prevRows);
-
-  // cada plataforma contra o próprio histórico
-  const bench=Object.fromEntries(SEGS.map(sg=>[sg,cplBenchmark(sg)]));
-  for(const seg of SEGS){
-    const m=segAvg(rows,seg), b=bench[seg];
-    if(!b.hist || !m.cpl || m.leads<5) continue;
-    const d=m.cpl/b.cpl-1;
-    if(Math.abs(d)>=CONFIG.rules.platformShift)
-      out.push({sev:d>0?'warn':'good', title:`CPL de ${SEG_NAME[seg]} ${d>0?'acima':'abaixo'} do próprio histórico`,
-        text:`${fmtMoney(m.cpl)} no período contra ${fmtMoney(b.cpl)} de referência (${b.label}), ${Math.abs(d*100).toFixed(0)}% ${d>0?'acima':'abaixo'}.`});
-  }
-
-  const camps=groupBy(rows,'campaign').sort((a,b)=>b.spend-a.spend);
-  if(camps.length>1 && camps[0].spend/tot.spend>=R.concentration)
-    out.push({sev:'info', level:'campaign', name:camps[0].name, title:'Verba concentrada em uma campanha',
-      text:`"${camps[0].name}" leva ${fmtPct(camps[0].spend/tot.spend).replace(',00','')} do investimento. Se ela piorar, o resultado inteiro cai junto.`});
-
-  for(const level of ['campaign','adset','ad']){
-    const groups=groupBy(rows,level), lbl={campaign:'Campanha',adset:'Conjunto',ad:'Criativo'}[level];
-    const minSpend=tot.spend*R.minSpendShare;
-    for(const g of groups){
-      if(g.spend<minSpend || !g.rows.some(r=>r.lead)) continue;
-      const avg=segAvg(rows,g.seg), ref=bench[g.seg];
-      if(!g.leads && ref.cpl && g.spend>=ref.cpl*1.5)
-        out.push({sev:'crit', level, name:g.name, title:`${lbl} gastando sem gerar lead`,
-          text:`"${g.name}" (${SEG_NAME[g.seg]}) já investiu ${fmtMoney(g.spend)} sem nenhum lead. Referência de CPL: ${fmtMoney(ref.cpl)} (${ref.label}). Pausar ou revisar.`});
-      else if(g.cpl && ref.cpl && g.cpl>=ref.cpl*R.cplBadFactor)
-        out.push({sev:'warn', level, name:g.name, title:`${lbl} com CPL alto`,
-          text:`"${g.name}" (${SEG_NAME[g.seg]}): CPL ${fmtMoney(g.cpl)}, ${((g.cpl/ref.cpl-1)*100).toFixed(0)}% acima da referência de ${fmtMoney(ref.cpl)} (${ref.label}).`});
-      else if(g.cpl && ref.cpl && g.leads>=3 && g.cpl<=ref.cpl*R.cplGoodFactor)
-        out.push({sev:'good', level, name:g.name, title:`${lbl} com espaço para escalar`,
-          text:`"${g.name}" (${SEG_NAME[g.seg]}): CPL ${fmtMoney(g.cpl)}, ${((1-g.cpl/ref.cpl)*100).toFixed(0)}% abaixo da referência (${ref.label}), com ${fmtInt(g.leads)} leads.`});
-
-      if(level==='ad' && avg.ctr && g.impressions>=R.minImpressionsCtr){
-        if(g.ctr!=null && g.ctr<avg.ctr*R.ctrLowFactor)
-          out.push({sev:'warn', level, name:g.name, title:'Criativo com baixa atratividade',
-            text:`"${g.name}": CTR ${fmtPct(g.ctr)} contra ${fmtPct(avg.ctr)} de média. Teste nova abertura, imagem ou chamada.`});
-        else if(g.ctr>=avg.ctr*1.3 && g.clicks>=30 && avg.cvr && (g.cvr||0)<avg.cvr*0.5)
-          out.push({sev:'warn', level, name:g.name, title:'Criativo atrai clique mas não converte',
-            text:`"${g.name}": CTR bom (${fmtPct(g.ctr)}), mas só ${fmtPct(g.cvr||0)} dos cliques viram lead (média ${fmtPct(avg.cvr)}). Confira se a promessa do anúncio bate com a página.`});
-      }
-    }
-  }
-
-  // tendência dentro do período
-  const days=daysBetween(S.from,S.to)+1;
-  if(days>=6){
-    const mid=addDays(S.from,Math.floor(days/2)-1);
-    for(const c of camps){
-      if(c.spend<tot.spend*CONFIG.rules.minSpendShare || !c.rows.some(r=>r.lead)) continue;
-      const a=metrics(c.rows.filter(r=>r.date<=mid)), b=metrics(c.rows.filter(r=>r.date>mid));
-      if(a.leads>=3 && b.leads>=3 && b.cpl>=a.cpl*CONFIG.rules.trendFactor)
-        out.push({sev:'warn', level:'campaign', name:c.name, title:'CPL piorando dentro do período',
-          text:`"${c.name}": CPL foi de ${fmtMoney(a.cpl)} na primeira metade para ${fmtMoney(b.cpl)} na segunda. Pode ser saturação de público ou criativo.`});
-    }
-  }
-
-  // melhor criativo de cada canal (Meta formulário, Meta site/LP, Google)
-  for(const seg of SEGS){
-    const segRows=rows.filter(r=>r.seg===seg);
-    const segSpend=segRows.reduce((t,r)=>t+r.spend,0);
-    const ads=groupBy(segRows,'ad').filter(g=>g.rows.some(r=>r.lead) && g.leads>=3 && g.spend>=segSpend*R.minSpendShare).sort((a,b)=>a.cpl-b.cpl);
-    if(ads.length>=2) out.push({sev:'good', level:'ad', name:ads[0].name, title:`Melhor criativo de ${SEG_NAME[seg]}`,
-      text:`"${ads[0].name}": ${fmtInt(ads[0].leads)} leads a ${fmtMoney(ads[0].cpl)} cada. Bom candidato para variações.`});
-  }
-
-  const order={crit:0,warn:1,good:2,info:3};
-  const seen=new Set();
-  return out.filter(i=>{const k=i.title+i.name; if(seen.has(k)) return false; seen.add(k); return true;})
-            .sort((a,b)=>order[a.sev]-order[b.sev]).slice(0,14);
-}
-
 /* ---------- render ---------- */
 function render(){
   const rows=periodRows(S.from,S.to);
@@ -537,11 +435,6 @@ function render(){
         </div>
         <svg id="chart" role="img" aria-label="Gráfico de investimento diário e CPL"></svg>
       </div>
-      <div class="panel">
-        <h2>Leitura do período</h2>
-        <p class="sub">Pontos que merecem atenção, calculados a partir das métricas. Clique para ver o item na tabela.</p>
-        <ul class="insights" id="insights"></ul>
-      </div>
     </section>
 
     <section>
@@ -558,22 +451,10 @@ function render(){
         </div>
       </div>
       <div class="tablewrap"><table id="tbl"></table></div>
-      <p class="foot">"Melhor" e "Atenção" comparam o CPL de cada item com o histórico do próprio canal (${CONFIG.rules.historyDays} dias antes do período). Canais separados: Meta formulário, Meta site/LP (inclui o histórico Typeform) e Google, considerando só itens com pelo menos ${(CONFIG.rules.minSpendShare*100).toFixed(0)}% do investimento do período. Leads, CPL e conversão: até ${fmtDate(addDays(CONFIG.bofuStartDate,-1))} contam todas as campanhas; a partir de ${fmtDate(CONFIG.bofuStartDate)}, só as com "${CONFIG.leadCampaignKeyword}" no nome.</p>
+      <p class="foot">"Melhor" e "Atenção" comparam o CPL de cada item com o histórico do próprio canal (${CONFIG.rules.historyDays} dias antes do período), com Meta e Google avaliados separadamente e considerando só itens com pelo menos ${(CONFIG.rules.minSpendShare*100).toFixed(0)}% do investimento do período. Leads no Meta = conversas por mensagem iniciadas; no Google = coluna Leads/Conversões.</p>
     </section>`;
 
   drawChart(rows);
-  const ins=buildInsights(rows,prevRows);
-  $('#insights').innerHTML = ins.length ? ins.map((i,n)=>`<li class="${i.sev}" data-n="${n}"><strong>${esc(i.title)}</strong><span>${esc(i.text)}</span></li>`).join('')
-    : '<li class="info"><strong>Nada fora do normal</strong><span>Nenhuma campanha, conjunto ou criativo se destacou pelas regras atuais neste período.</span></li>';
-  $('#insights').onclick=e=>{
-    const li=e.target.closest('li[data-n]'); if(!li) return;
-    const i=ins[+li.dataset.n]; if(!i.level) return;
-    S.level=i.level; S.campaignFilter=''; S.search=i.name; renderTable(rows);
-    document.querySelectorAll('.tabs button').forEach(b=>b.setAttribute('aria-selected',b.dataset.level===S.level));
-    $('#campFilter').value=''; $('#search').value=i.name;
-    $('#tbl').scrollIntoView({behavior:'smooth',block:'start'});
-    const tr=$('#tbl tbody tr'); if(tr) tr.classList.add('flash');
-  };
 
   document.querySelectorAll('.tabs button').forEach(b=>b.onclick=()=>{
     S.level=b.dataset.level;
@@ -621,7 +502,7 @@ function renderTable(rows){
     return dir*(x-y);
   });
   const maxSpend=Math.max(...groups.map(g=>g.spend),1);
-  const tagHtml={nonlead:'<span class="tag other">Não é BOFU</span>',best:'<span class="tag best">Melhor</span>',worst:'<span class="tag worst">Atenção</span>',nolead:'<span class="tag nolead">Sem lead</span>'};
+  const tagHtml={nonlead:'<span class="tag other">Não conta lead</span>',best:'<span class="tag best">Melhor</span>',worst:'<span class="tag worst">Atenção</span>',nolead:'<span class="tag nolead">Sem lead</span>'};
 
   $('#tbl').innerHTML=`
     <thead><tr>${cols.map(c=>`<th data-k="${c.k}" ${c.k===col?`aria-sort="${dir>0?'ascending':'descending'}"`:''}>${c.l}</th>`).join('')}</tr></thead>
@@ -717,6 +598,7 @@ async function load(){
   for(const [k,label] of [['meta','bd meta'],['google','bd google ads']]){
     const err=payload.errors&&payload.errors[k], rep=k==='meta'?meta.report:google.report;
     if(err) problems.push(`<b>${label}:</b> ${esc(err)}`);
+    else if(!rep.missing.length && rep.noLeads && rep.rows) problems.push(`<b>${label}:</b> não encontrei a coluna de ${k==='meta'?'<code>Messaging Conversations Started</code>':'leads/conversões'}, então os leads aparecem zerados.`);
     else if(rep.missing.length) problems.push(`<b>${label}:</b> não encontrei as colunas ${rep.missing.map(f=>`<code>${f}</code>`).join(', ')}. Cabeçalhos que o painel viu estão no console do navegador. Ajuste em <code>CONFIG.columns</code>.`);
   }
   console.table(S.reports.map(r=>({plataforma:r.plat,linhas:r.rows,...r.columns})));
@@ -750,12 +632,12 @@ matchMedia('(prefers-color-scheme: dark)').addEventListener?.('change',()=>S.all
 function demoData(){
   let seed=7; const rnd=()=>(seed=(seed*16807)%2147483647)/2147483647;
   const end=new Date(); end.setDate(end.getDate()-1);
-  const metaH='Date,Campaign Name,Ad Set Name,Ad Name,Amount Spent,Impressions,Link Clicks,Leads';
+  const metaH='Date,Campaign Name,Ad Set Name,Ad Name,Amount Spent,Impressions,Link Clicks,Messaging Conversations Started';
   const gH='Day,Campaign,Ad group,Ad,Cost,Impressions,Clicks,Conversions';
-  const metaC=[['[REV] BOFU | Lookalike',['LAL 1% compradores','LAL 3% leads'],['Vídeo depoimento Paulo','Carrossel 5 pilares','Estático agenda'],1.0],
-               ['[REV] BOFU | Interesses',['Liderança e gestão','Empreendedores 30-55'],['Vídeo depoimento Paulo','Estático agenda','Reels bastidores'],1.4],
-               ['[REV] Engajamento | Vídeos',['Visitantes LP 30d'],['Estático última chamada','Vídeo depoimento Paulo'],0.7]];
-  const gC=[['[REV] Search | Marca',['Marca Febracis'],['RSA marca'],0.8],['[REV] BOFU | Search Liderança',['Curso liderança','Mentoria empresários'],['RSA liderança A','RSA liderança B'],1.6],['[REV] BOFU | PMax',['(sem conjunto)'],['PMax asset group'],1.2]];
+  const metaC=[['[PRICE] WhatsApp | Lançamentos',['Interesse imóveis','LAL 1% clientes'],['Vídeo tour apartamento','Carrossel plantas','Estático condições'],1.0],
+               ['[PRICE] WhatsApp | Interesses',['Investidores','Famílias 30-50'],['Vídeo tour apartamento','Estático condições','Reels corretor'],1.4],
+               ['[PRICE] Remarketing',['Visitantes site 30d'],['Estático última unidade','Vídeo tour apartamento'],0.7]];
+  const gC=[['[PRICE] Search | Marca',['Marca Price BR'],['RSA marca'],0.8],['[PRICE] Search | Imóveis',['Apartamento à venda','Casa em condomínio'],['RSA imóveis A','RSA imóveis B'],1.6],['[PRICE] PMax',['(sem conjunto)'],['PMax asset group'],1.2]];
   const mk=(head,camps,plat)=>{ const lines=[head];
     for(let i=59;i>=0;i--){ const d=new Date(end); d.setDate(d.getDate()-i); const iso=d.toISOString().slice(0,10);
       for(const [c,sets,ads,f] of camps) for(const s of sets) for(const a of ads){
