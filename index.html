@@ -451,7 +451,7 @@ function render(){
         </div>
       </div>
       <div class="tablewrap"><table id="tbl"></table></div>
-      <p class="foot">"Melhor" e "Atenção" comparam o CPL de cada item com o histórico do próprio canal (${CONFIG.rules.historyDays} dias antes do período), com Meta e Google avaliados separadamente e considerando só itens com pelo menos ${(CONFIG.rules.minSpendShare*100).toFixed(0)}% do investimento do período. Leads no Meta = conversas por mensagem iniciadas; no Google = coluna Leads/Conversões.</p>
+      <p class="foot">Leads no Meta = conversas por mensagem iniciadas; no Google = coluna Leads/Conversões.</p>
     </section>`;
 
   drawChart(rows);
@@ -474,20 +474,6 @@ function renderTable(rows){
   const q=norm(S.search);
   if(q) groups=groups.filter(g=>norm(g.name+' '+g.path).includes(q));
 
-  // marcações de melhor / atenção por plataforma
-  const minSpend=tot.spend*CONFIG.rules.minSpendShare;
-  const avgBy=Object.fromEntries(SEGS.map(sg=>[sg,{cpl:cplBenchmark(sg).cpl}]));
-  groups.filter(g=>!g.rows.some(r=>r.lead)).forEach(g=>g.tag='nonlead');
-  for(const seg of SEGS){
-    const eligible=groups.filter(g=>g.seg===seg && !g.tag && g.spend>=minSpend && g.leads>0 && avgBy[seg].cpl && g.cpl<avgBy[seg].cpl).sort((a,b)=>a.cpl-b.cpl);
-    eligible.slice(0,Math.min(3,Math.ceil(eligible.length/3))).forEach(g=>g.tag='best');
-    for(const g of groups.filter(g=>g.seg===seg && g.spend>=minSpend && !g.tag)){
-      const avg=avgBy[seg].cpl;
-      if(!g.leads && avg && g.spend>=avg) g.tag='nolead';
-      else if(g.cpl && avg && g.cpl>=avg*CONFIG.rules.cplBadFactor) g.tag='worst';
-    }
-  }
-
   const cols=[
     {k:'name',l:S.level==='campaign'?'Campanha':S.level==='adset'?'Conjunto':'Criativo'},
     {k:'spend',l:'Investimento',f:fmtMoney},{k:'leads',l:'Leads',f:fmtInt},{k:'cpl',l:'CPL',f:fmtMoney,low:true},
@@ -502,20 +488,15 @@ function renderTable(rows){
     return dir*(x-y);
   });
   const maxSpend=Math.max(...groups.map(g=>g.spend),1);
-  const tagHtml={nonlead:'<span class="tag other">Não conta lead</span>',best:'<span class="tag best">Melhor</span>',worst:'<span class="tag worst">Atenção</span>',nolead:'<span class="tag nolead">Sem lead</span>'};
 
   $('#tbl').innerHTML=`
     <thead><tr>${cols.map(c=>`<th data-k="${c.k}" ${c.k===col?`aria-sort="${dir>0?'ascending':'descending'}"`:''}>${c.l}</th>`).join('')}</tr></thead>
     <tbody>${groups.length?groups.map(g=>{
-      const avg=avgBy[g.seg];
       return `<tr>
-        <td><span class="name"><span class="plat ${g.plat}" title="${g.plat==='meta'?'Meta':'Google'}"></span>${esc(g.name)}${g.tag?tagHtml[g.tag]:''}</span>
+        <td><span class="name"><span class="plat ${g.plat}" title="${g.plat==='meta'?'Meta':'Google'}"></span>${esc(g.name)}</span>
           ${g.path?`<span class="path">${esc(g.path)}</span>`:''}
           <span class="bar" title="Participação no investimento"><b style="width:${(g.spend/maxSpend*100).toFixed(1)}%"></b></span></td>
-        ${cols.slice(1).map(c=>{
-          let cls='';
-          if(c.k==='cpl' && g.tag!=='nonlead' && g.cpl && avg.cpl && g.spend>=minSpend) cls = g.cpl<=avg.cpl*CONFIG.rules.cplGoodFactor?'good':g.cpl>=avg.cpl*CONFIG.rules.cplBadFactor?'bad':'';
-          return `<td class="${cls}">${c.f(g[c.k])}</td>`;}).join('')}
+        ${cols.slice(1).map(c=>`<td>${c.f(g[c.k])}</td>`).join('')}
       </tr>`;}).join(''):`<tr><td colspan="${cols.length}" style="text-align:center;color:var(--muted);padding:30px">Nenhum item com esses filtros. Limpe a busca ou escolha outra campanha.</td></tr>`}
     </tbody>`;
   $('#tbl thead').onclick=e=>{
